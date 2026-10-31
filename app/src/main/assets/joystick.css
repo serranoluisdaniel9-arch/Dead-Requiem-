@@ -1,0 +1,134 @@
+/* Independent layout editor; never changes the live #joystick or #stick. */
+.joystick-editor {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 70;
+  overflow: hidden;
+  background: rgba(5, 13, 16, .44);
+  color: #eeeae1;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.joystick-editor.hidden { display: none !important; }
+.joyedit-preview {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  border: 1px solid rgba(243, 182, 90, .85);
+  border-radius: 50%;
+  background: rgba(9, 22, 25, .64);
+  box-shadow: 0 0 0 3px rgba(243, 182, 90, .09), 0 6px 20px rgba(0, 0, 0, .2);
+  cursor: grab;
+  touch-action: none;
+}
+.joyedit-preview.joyedit-dragging { cursor: grabbing; border-color: #95cfce; }
+.joyedit-ring {
+  position: absolute;
+  top: 15%;
+  right: 15%;
+  bottom: 15%;
+  left: 15%;
+  border: 1px dashed rgba(199, 230, 212, .4);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.joyedit-stick {
+  position: absolute;
+  width: 36%;
+  height: 36%;
+  top: 32%;
+  left: 32%;
+  border: 1px solid rgba(178, 211, 199, .8);
+  border-radius: 50%;
+  background: rgba(164, 196, 184, .2);
+  box-shadow: inset 0 0 20px rgba(179, 215, 197, .1);
+  pointer-events: none;
+}
+.joyedit-marker {
+  position: absolute;
+  right: 0;
+  bottom: 6%;
+  left: 0;
+  color: #f3b65a;
+  font: 8px 'Courier New', monospace;
+  letter-spacing: 1px;
+  text-align: center;
+  pointer-events: none;
+}
+.joyedit-panel {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  box-sizing: border-box;
+  width: 292px;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+  padding: 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgba(149, 207, 206, .45);
+  background: rgba(13, 29, 32, .97);
+  box-shadow: 0 7px 25px rgba(0, 0, 0, .32);
+  touch-action: pan-y;
+}
+.joyedit-title { margin: 0; font: bold 18px Arial, sans-serif; }
+.joyedit-hint {
+  margin: 7px 0 12px;
+  color: #b1c4c1;
+  font: 12px/1.4 Arial, sans-serif;
+}
+.joyedit-size-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 12px Arial, sans-serif;
+}
+.joyedit-size-value { color: #f3b65a; font: 12px 'Courier New', monospace; }
+.joyedit-size {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  margin: 0 0 3px;
+  padding: 0;
+  cursor: pointer;
+  touch-action: pan-x;
+  accent-color: #f3b65a;
+}
+.joyedit-actions { display: flex; }
+.joyedit-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px;
+  border: 1px solid rgba(149, 207, 206, .65);
+  background: #193235;
+  color: #d4ece5;
+  font: 12px Arial, sans-serif;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.joyedit-actions .joyedit-done {
+  margin-left: 8px;
+  border-color: #f3b65a;
+  background: #f3b65a;
+  color: #172022;
+  font-weight: bold;
+}
+.joyedit-status { margin: 9px 0 0; color: #a8bdb7; font: 10px/1.4 Arial, sans-serif; }
+.joyedit-preview:focus,
+.joyedit-size:focus,
+.joyedit-actions button:focus { outline: 2px solid #95cfce; outline-offset: 3px; }
+@media (max-height: 450px) {
+  .joyedit-panel { width: 276px; padding: 11px; }
+  .joyedit-title { font-size: 16px; }
+  .joyedit-hint { margin: 5px 0 8px; font-size: 11px; }
+  .joyedit-status { margin-top: 6px; }
+}

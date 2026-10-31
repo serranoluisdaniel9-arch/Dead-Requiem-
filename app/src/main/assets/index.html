@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0e13">
+  <title>Dead Strike Reborn v3.0</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./joystick.css">
+  <link rel="stylesheet" href="./shop.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body class="is-standalone">
+  <main id="app" class="relative w-full h-full overflow-hidden select-none bg-black">
+    <canvas id="game" tabindex="0" aria-label="Vista 3D de Dead Strike Reborn"></canvas>
+    <div class="screen-texture" aria-hidden="true"></div>
+    <div id="damage" aria-hidden="true"></div>
+    <div id="fade-overlay" class="fade-out" style="display:none;" aria-hidden="true"></div>
+
+    <div id="sniper-scope" aria-hidden="true">
+      <div class="sniper-crosshair">
+        <div class="sniper-line-h"></div>
+        <div class="sniper-line-v"></div>
+        <div class="sniper-ring"></div>
+        <div class="sniper-tag">OJO DE HALCÓN · 7.62 TÁCTICO</div>
+      </div>
+    </div>
+
+    <section id="intro" class="overlay intro" aria-label="Menú principal de Dead Strike Reborn">
+      <div class="intro-bg" aria-hidden="true"><img src="./assets/branding/intro-bg.jpg" alt="Fondo Dead Requiem" decoding="async"></div>
+      <header class="intro-header">
+        <a href="#" class="wordmark" tabindex="-1">
+          <img src="./assets/branding/icon-192.png" alt="Icono" class="brand-icon">
+          <span>DEAD STRIKE <span class="wordmark-number">REBORN</span></span>
+        </a>
+        <span class="network-label"><i></i> SUPERVIVENCIA ZOMBI EN TIEMPO REAL</span>
+      </header>
+
+      <div class="intro-content">
+        <span class="eyebrow"><span class="short-line"></span> BROTE URBANO · DISTRITO 09</span>
+        <h1 class="game-title">
+          DEAD STRIKE
+          <span class="game-title-reborn">REBORN<span class="title-dot">.</span></span>
+        </h1>
+        <div class="mission-title">
+          <span class="mission-index">OPERACIÓN 01</span>
+          <h2>Escape de la Avenida Sur</h2>
+        </div>
+        <p class="intro-description">
+          Cruza la niebla, administra tu munición y neutraliza a los infectados antes de que te rodeen.
+          Recarga antes de agotar el cargador para recargar en la mitad de tiempo, o utiliza el botón 180° para vigilar tu espalda.
+        </p>
+
+        <div class="intro-cta">
+          <button id="start" class="primary-button">
+            <span>INICIAR MISIÓN</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+          <button id="intro-continue" class="refuge-button" style="border-color: #f59e0b; color: #f59e0b;" title="Continuar partida">
+            <strong>CONTINUAR</strong>
+            <span>ÚLTIMO CHECKPOINT</span>
+          </button>
+          <button id="intro-shop" class="refuge-button" title="Accesorios y Arsenal">
+            <strong><span id="wallet-value">0</span> CR</strong>
+            <span>ARMAS Y TIENDA</span>
+          </button>
+        </div>
+
+        <div class="loadout-summary">
+          <span id="loadout-summary">Cargando arsenal y mejoras…</span>
+          <div id="profile-save-note" class="save-warning hidden">Progreso guardado localmente</div>
+        </div>
+
+        <div class="loading" role="status" aria-live="polite">
+          <span class="loading-dot"></span>
+          <span id="loading">Preparando motor 3D y niebla…</span>
+        </div>
+      </div>
+
+      <footer class="intro-footer">
+        <span class="landscape-tip">
+          OPTIMIZADO PARA PANTALLA TÁCTIL · GIRO 180° · SIGILO · CAM FPS · CLIMA DINÁMICO
+        </span>
+        <span class="footer-code">DSR—APK NATIVO v3.0</span>
+      </footer>
+    </section>
+
+    <section id="hud" class="hud hidden" aria-label="Estado y controles del juego">
+      <div id="classic-retro-hud" aria-hidden="true">
+        <div id="classic-ammo" class="classic-ammo-line">12/36 : Handgun 9 Cal</div>
+        <div id="classic-energy" class="classic-energy-line">100/100 : Energy</div>
+      </div>
+
+      <button id="classic-calc" class="classic-top-left-calc" aria-label="Abrir Refugio y Tienda" title="Refugio y Tienda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true">
+          <rect x="4" y="2" width="16" height="20" rx="2" />
+          <line x1="8" y1="6" x2="16" y2="6" />
+          <line x1="8" y1="10" x2="10" y2="10" />
+          <line x1="14" y1="10" x2="16" y2="10" />
+          <line x1="8" y1="14" x2="10" y2="14" />
+          <line x1="14" y1="14" x2="16" y2="14" />
+          <line x1="8" y1="18" x2="10" y2="18" />
+          <line x1="14" y1="18" x2="16" y2="18" />
+        </svg>
+      </button>
+
+      <div class="hud-top">
+        <div class="mission-hud">
+          <div class="hud-brand">DS<span>R</span><span class="hud-live">REBORN</span></div>
+          <div class="objective-label">OBJETIVO DE ESCAPE</div>
+          <p id="objective">Alcanza la zona de extracción</p>
+          <div class="mission-nav">
+            <span id="mission-arrow" aria-hidden="true">↑</span>
+            <strong id="mission-distance">137 m</strong>
+            <span id="mission-danger">AVANZA CON CUIDADO</span>
+          </div>
+
+          <div class="health-panel">
+            <div class="health-heading">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z" /></svg>
+              <span>VITALES</span>
+              <strong><span id="health">100</span><small id="health-max"> / 100</small></strong>
+            </div>
+            <div class="health-track">
+              <div id="health-bar"></div>
+            </div>
+            <span class="health-caption">MANTENTE EN MOVIMIENTO</span>
+          </div>
+        </div>
+
+        <div class="wave-panel">
+          <div class="wave-stat">
+            <span class="stat-label">CRÉDITOS</span>
+            <strong id="wave">0</strong>
+          </div>
+          <div class="kill-stat">
+            <span class="stat-label">ELIMINADOS</span>
+            <strong id="kills">0</strong>
+          </div>
+          <div id="wave-status" class="wave-progress">
+            <span id="wave-label">OLEADAS</span>
+            <strong id="wave-count">0/3</strong>
+          </div>
+        </div>
+
+        <div class="utility-buttons">
+          <button id="btn-env" class="env-badge" title="Alternar clima (Día, Lluvia día, Noche, Tormenta)">
+            <span id="env-badge">CLIMA: NOCHE</span>
+          </button>
+          <button id="btn-flashlight" class="icon-button active" aria-label="Linterna táctica" title="Linterna On/Off">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+              <path d="M18 6l-3-3H9L6 6v3l3 3v9h6v-9l3-3V6z"/>
+              <line x1="9" y1="9" x2="15" y2="9"/>
+            </svg>
+          </button>
+          <button id="btn-cam" class="icon-button cam-button" aria-label="Cámara FPS / 3ra Persona" title="Cámara FPS / 3ra Persona">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+          </button>
+          <button id="settings" class="icon-button" aria-label="Ajustar controles y joystick" title="Controles y joystick">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6" /></svg>
+          </button>
+          <button id="sound" class="icon-button" aria-label="Activar o silenciar sonido" title="Sonido">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4V5zM15 8c3 2 3 6 0 8M18 5c5 4 5 10 0 14" /></svg>
+          </button>
+          <button id="fullscreen" class="icon-button" aria-label="Pantalla completa" title="Pantalla completa">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5" /></svg>
+          </button>
+          <button id="pause" class="icon-button" aria-label="Pausar juego" title="Pausar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="crosshair" aria-hidden="true"><span></span></div>
+
+      <button id="interact" class="interact-button hidden">
+        <kbd class="desktop-hint">F</kbd>
+        <span id="interact-label">Recoger</span>
+        <span aria-hidden="true">↗</span>
+      </button>
+
+      <div id="status" class="status-toast" role="status" aria-live="polite"></div>
+
+      <button id="btn-180" class="turn-180-btn" aria-label="Giro 180 grados rápido" title="Girar 180°">
+        180
+      </button>
+
+      <div class="hud-bottom">
+        <div class="ammo-panel">
+          <span class="weapon-label">
+            <b id="weapon-name">Pistola 9 mm</b> <span>AHORRA MUNICIÓN</span>
+          </span>
+          <div class="ammo-count">
+            <strong id="ammo">12</strong><span>/</span><span id="reserve">018</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21V7l4-5 4 5v14H8zM8 16h8" /></svg>
+          </div>
+          <span id="reload-feedback" class="combat-status">RECARGA ANTES DE VACIAR</span>
+          <span class="reload-hint desktop-hint"><kbd>R</kbd> RECARGAR</span>
+        </div>
+      </div>
+
+      <div class="touch-controls">
+        <div id="joystick" aria-label="Joystick de movimiento">
+          <div class="joystick-ring" aria-hidden="true"></div>
+          <div id="stick"></div>
+          <span class="joystick-label">MOVER</span>
+        </div>
+
+        <div class="touch-actions">
+          <button id="btn-crouch" class="crouch-button" aria-label="Agacharse o Levantarse" title="Agacharse">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 4a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm2 7.5l2-2.5V5h-2v3l-2.5 1.5L9 8v4l3 2v6h2v-6.5l-2-2z"/>
+            </svg>
+            <span id="crouch-label">AGACHARSE</span>
+          </button>
+
+          <button id="btn-sprint" class="sprint-button" aria-label="Sprint táctico rápido" title="Sprint">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/>
+            </svg>
+            <span id="sprint-label">SPRINT</span>
+          </button>
+
+          <button id="aim" class="aim-button" aria-label="Activar apuntado" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5" /><circle cx="12" cy="12" r="4" /><path d="M12 10v4M10 12h4" />
+            </svg>
+            <span id="aim-label">APUNTAR</span>
+          </button>
+
+          <button id="shove" class="shove-button" aria-label="Empujar al infectado de delante">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 16v-4a1 1 0 0 1 2 0V6a1 1 0 0 1 2 0v5-7a1 1 0 0 1 2 0v7-6a1 1 0 0 1 2 0v6-4a1 1 0 0 1 2 0v6l2-2a1 1 0 0 1 2 2l-4 6H9l-4-3z" />
+            </svg>
+            <span id="shove-label">EMPUJAR</span>
+          </button>
+
+          <button id="reload" class="reload-button" aria-label="Recargar arma">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 8a8 8 0 1 0 0 8M20 3v6h-6" />
+            </svg>
+            <span>RECARGAR</span>
+          </button>
+
+          <button id="fire" class="fire-button" aria-label="Disparar arma">
+            <svg viewBox="0 0 36 36" aria-hidden="true">
+              <circle cx="18" cy="18" r="10" /><circle cx="18" cy="18" r="3" /><path d="M18 2v8M18 26v8M2 18h8M26 18h8" />
+            </svg>
+            <span>FUEGO</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="paused" class="overlay modal-overlay hidden" aria-label="Pausa y ajustes">
+      <div class="modal-panel pause-panel">
+        <span class="eyebrow">TRANSMISIÓN EN ESPERA</span>
+        <h2>Pausa y ajustes<span>.</span></h2>
+        <p>Ajusta la sensibilidad de giro y apuntado a tu preferencia de juego.</p>
+        <fieldset class="control-settings">
+          <legend>CONTROL DE CÁMARA</legend>
+          <label for="look-sensitivity">
+            <span>Sensibilidad de cámara</span>
+            <output id="look-value" for="look-sensitivity">100%</output>
+          </label>
+          <input id="look-sensitivity" type="range" min="30" max="180" step="5" value="100">
+          <label for="aim-sensitivity">
+            <span>Sensibilidad al apuntar</span>
+            <output id="aim-value" for="aim-sensitivity">65%</output>
+          </label>
+          <input id="aim-sensitivity" type="range" min="20" max="150" step="5" value="65">
+          <div class="settings-foot">
+            <button id="center-look" type="button">Centrar mira</button>
+            <button id="reset-controls" type="button">Restablecer</button>
+            <span id="settings-saved" role="status">Se guarda automáticamente</span>
+          </div>
+        </fieldset>
+        <div class="pause-actions">
+          <button id="edit-joystick" class="joystick-settings-button" type="button">
+            JOYSTICK<small>TAMAÑO Y POSICIÓN</small>
+          </button>
+          <button id="resume" class="primary-button">
+            <span>Volver a la partida</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+        <span class="modal-code">DSR / PAUSA</span>
+      </div>
+    </section>
+
+    <section id="end" class="overlay modal-overlay hidden" aria-label="Fin de la partida">
+      <div class="modal-panel end-panel">
+        <span class="eyebrow">FIN DE LA TRANSMISIÓN</span>
+        <h2 id="end-title">El distrito te reclama.</h2>
+        <p id="end-detail">La niebla nunca descansa. Vuelve a intentarlo.</p>
+        <div class="run-reward">
+          <strong id="end-reward">Sin recompensa</strong>
+          <span id="reward-persistence">Guardado en este dispositivo</span>
+        </div>
+        <div class="end-actions">
+          <button id="restart" class="primary-button">
+            <span id="restart-text">CONTINUAR</span>
+            <span aria-hidden="true">↗</span>
+          </button>
+          <button id="end-shop" class="refuge-button">TIENDA / ARSENAL</button>
+          <button id="end-menu" class="refuge-button" style="border-color:#38bdf8;color:#38bdf8;">MENÚ PRINCIPAL</button>
+        </div>
+        <span class="modal-code">DSR / FIN DEL RECORRIDO</span>
+      </div>
+    </section>
+
+    <section id="route" class="overlay modal-overlay hidden" aria-label="Elegir ruta de escape">
+      <div class="modal-panel route-panel">
+        <span class="eyebrow">BIFURCACIÓN / ELIGE UNA VEZ</span>
+        <h2>Dos salidas<span>.</span></h2>
+        <p>La corta te expone. La larga te da tiempo y suministros. No hay vuelta atrás.</p>
+        <div class="route-options">
+          <button id="route-short" class="route-card" type="button" data-route="short">
+            <span class="route-tag">RIESGO ALTO</span>
+            <strong>Ruta corta</strong>
+            <span class="route-sub">Avenida directa</span>
+            <span class="route-desc">Menos metros, más infectados. Sin suministros.</span>
+            <span class="route-meta">+6 infectados · 0 cr extra</span>
+          </button>
+          <button id="route-long" class="route-card" type="button" data-route="long">
+            <span class="route-tag">RIESGO MEDIO</span>
+            <strong>Ruta larga</strong>
+            <span class="route-sub">Desvío por la clínica</span>
+            <span class="route-desc">El doble de camino, menos presión y un alijo de suministros.</span>
+            <span class="route-meta">+15 cr al escapar</span>
+          </button>
+        </div>
+        <span class="modal-code">DSR / BIFURCACIÓN</span>
+      </div>
+    </section>
+
+    <section id="joystick-editor" class="overlay hidden" aria-label="Personalizar joystick" aria-hidden="true"></section>
+    <section id="shop" class="overlay hidden" aria-label="Tienda del refugio"></section>
+  </main>
+  <script type="module" src="./game.js?v=3.0"></script>
+</body>
+</html>

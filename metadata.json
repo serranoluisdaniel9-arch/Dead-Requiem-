@@ -1,0 +1,6 @@
+{
+  "name": "Dead Strike Reborn",
+  "description": "Reconstrucción 3D de Dead Strike con gráficos modernos, arsenal expandido, controles táctiles y sigilo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
